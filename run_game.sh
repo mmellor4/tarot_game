@@ -7,7 +7,7 @@
 # install dependencies from requirements.txt
 pip install -r requirements.txt
 
-pip install pygame-menu
+python3 -m pip install pygame-menu
 
 # Run the game
 python3 code/main.py
