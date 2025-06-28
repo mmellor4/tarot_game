@@ -37,7 +37,7 @@ def render_wrapped_text(text, surface, font, max_width, y_pos):
     return y_pos + len(wrapped_text) * line_height
 
 
-def game_window():
+def start_game_window():
     # global bool to end loop in main menu
     global game_started
 
@@ -45,9 +45,13 @@ def game_window():
 
     game_screen.fill(bg_color)
 
+    chariot = pygame.image.load("rider-waite-tarot/major_arcana_chariot.png")
+    chariot = pygame.transform.scale(chariot, (200, 346))
+    screen.blit(chariot, (250, 300))
+
     Button(20, 20, 100, 50, 'Quit', quit_game, name="QUIT")
 
-    text1 = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+    text1 = "You begin in a maze, a fork in the path in front of you."
     text2 = "Choose your path."
 
     # show text on the screen
@@ -57,8 +61,8 @@ def game_window():
     y_pos = render_wrapped_text(text1, game_screen, font, X, y_pos + 20)
     y_pos = render_wrapped_text(text2, game_screen, font, X, y_pos + 20)
 
-    Button(100, y_pos + 20, 200, 50, 'Option 1', option1_window, name="opt1")
-    Button(350, y_pos + 20, 200, 50, 'Option 2', option2_window, name="opt2")
+    Button(100, y_pos + 20, 200, 50, 'Right', choiceA_window, name="CHOICE_A")
+    Button(350, y_pos + 20, 200, 50, 'Left', choiceB_window, name="CHOICE_B")
 
     pygame.display.flip()
 
@@ -105,7 +109,7 @@ while True:
                 # stop timer to prevent further updates
                 pygame.time.set_timer(update_loading, 0)
                 # call game window
-                game_window()
+                start_game_window()
 
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -122,8 +126,10 @@ while True:
 
     elif game_started:
         # if game has started, show the game window and stop displaying menu
-        for obj in Button.objects:
-            obj.process()
+        for event in events:
+            Button.handle_event(event)
+
+        Button.draw_all(screen)
 
 
 
