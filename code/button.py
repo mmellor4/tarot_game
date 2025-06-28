@@ -19,73 +19,58 @@ selected_color = (0, 255, 0)
 font_size = 20
 font = pygame.font.Font("fonts/pixel_font.ttf", font_size)
 
+# Button class derived from https://thepythoncode.com/code/make-a-button-using-pygame-in-python
 
-class Button():
 
+class Button:
     objects = []
 
-    def __init__(self, x, y, width, height, buttonText='Button', onclickFunction=None, onePress=False, name=""):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
+    def __init__(self, x, y, width, height, buttonText='Button', onclickFunction=None, name=""):
+        self.rect = pygame.Rect(x, y, width, height)
         self.onclickFunction = onclickFunction
-        self.onePress = onePress
         self.name = name
 
         self.fillColors = {
             'normal': '#ffffff',
             'hover': '#666666',
-            'pressed': '#333333',
         }
 
-        self.buttonSurface = pygame.Surface((self.width, self.height))
-        self.buttonRect = pygame.Rect(self.x, self.y, self.width, self.height)
-
-        self.buttonSurf = font.render(buttonText, True, (20, 20, 20))
-
-        self.alreadyPressed = False
-        self.clicked = False
+        self.surface = pygame.Surface((width, height))
+        self.text = font.render(buttonText, True, (20, 20, 20))
 
         Button.objects.append(self)
 
-    def process(self):
-        if self.clicked:
-            return
-
+    def draw(self, screen):
         mousePos = pygame.mouse.get_pos()
+        color = self.fillColors['hover'] if self.rect.collidepoint(mousePos) else self.fillColors['normal']
+        self.surface.fill(color)
 
-        self.buttonSurface.fill(self.fillColors['normal'])
-        if self.buttonRect.collidepoint(mousePos):
-            self.buttonSurface.fill(self.fillColors['hover'])
+        self.surface.blit(
+            self.text,
+            (self.rect.width // 2 - self.text.get_width() // 2,
+             self.rect.height // 2 - self.text.get_height() // 2)
+        )
 
-            if pygame.mouse.get_pressed(num_buttons=3)[0]:
-                self.buttonSurface.fill(self.fillColors['pressed'])
+        screen.blit(self.surface, self.rect)
 
-                if self.onePress:
-                    self.onclickFunction()
+    @classmethod
+    def handle_event(cls, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            for button in cls.objects:
+                if button.rect.collidepoint(event.pos):
+                    if button.onclickFunction:
+                        button.onclickFunction()
+                    break  # Stop after the first button is clicked
 
-                elif not self.alreadyPressed:
-                    self.onclickFunction()
-                    self.alreadyPressed = True
-
-                # flag button as clicked
-                self.clicked = True
-            else:
-                self.alreadyPressed = False
-
-        self.buttonSurface.blit(self.buttonSurf, [
-            self.buttonRect.width/2 - self.buttonSurf.get_rect().width/2,
-            self.buttonRect.height/2 - self.buttonSurf.get_rect().height/2
-        ])
-
-        # only show the button if not clicked
-        if not self.clicked:
-            screen.blit(self.buttonSurface, self.buttonRect)
+    @classmethod
+    def draw_all(cls, screen):
+        for button in cls.objects:
+            button.draw(screen)
 
     @classmethod
     def clear_buttons(cls):
         cls.objects.clear()
+
 
 
 def button_pressed():
